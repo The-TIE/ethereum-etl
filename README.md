@@ -3,7 +3,7 @@
 [![Build Status](https://app.travis-ci.com/blockchain-etl/ethereum-etl.svg?branch=develop)](https://travis-ci.com/github/blockchain-etl/ethereum-etl)
 [![Join the chat at https://gitter.im/ethereum-eth](https://badges.gitter.im/ethereum-etl.svg)](https://gitter.im/ethereum-etl/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Telegram](https://img.shields.io/badge/telegram-join%20chat-blue.svg)](https://t.me/joinchat/GsMpbA3mv1OJ6YMp3T5ORQ)
-[![Discord](https://img.shields.io/badge/discord-join%20chat-blue.svg)](https://discord.gg/wukrezR)
+[![Discord](https://img.shields.io/badge/discord-join%20chat-blue.svg)](https://discord.gg/tRKG7zGKtF)
 
 Ethereum ETL lets you convert blockchain data into convenient formats like CSVs and relational databases.
 
@@ -91,7 +91,7 @@ For the latest version, check out the repo and call
 
 ## Running in Docker
 
-1. Install Docker: https://docs.docker.com/install/
+1. Install Docker: https://docs.docker.com/get-docker/
 
 2. Build a docker image
         
@@ -105,11 +105,18 @@ For the latest version, check out the repo and call
 
 4. Run streaming to console or Pub/Sub
 
-        > docker build -t ethereum-etl:latest -f Dockerfile .
+        > docker build -t ethereum-etl:latest .
         > echo "Stream to console"
         > docker run ethereum-etl:latest stream --start-block 500000 --log-file log.txt
         > echo "Stream to Pub/Sub"
         > docker run -v /path_to_credentials_file/:/ethereum-etl/ --env GOOGLE_APPLICATION_CREDENTIALS=/ethereum-etl/credentials_file.json ethereum-etl:latest stream --start-block 500000 --output projects/<your-project>/topics/crypto_ethereum
+
+If running on Apple M1 chip add the `--platform linux/x86_64` option to the `build` and `run` commands e.g.:
+
+```
+docker build --platform linux/x86_64 -t ethereum-etl:latest .
+docker run --platform linux/x86_64 ethereum-etl:latest stream --start-block 500000
+```
 
 ## Projects using Ethereum ETL
 * [Google](https://goo.gl/oY5BCQ) - Public BigQuery Ethereum datasets
