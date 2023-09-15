@@ -21,7 +21,7 @@
 # SOFTWARE.
 import logging
 
-from web3.exceptions import BadFunctionCallOutput, ContractLogicError
+from web3.exceptions import BadFunctionCallOutput
 
 from ethereumetl.domain.token import EthToken
 from ethereumetl.erc20_abi import ERC20_ABI, ERC20_ABI_ALTERNATIVE_1
@@ -57,7 +57,11 @@ class EthTokenService(object):
         if isinstance(name, bytes):
             name = self._bytes_to_string(name)
 
-        decimals = self._get_first_result(contract.functions.decimals(), contract.functions.DECIMALS())
+        # DEV: Failing on non-compliant erc20 tokens.
+        try:
+            decimals = self._get_first_result(contract.functions.decimals(), contract.functions.DECIMALS())
+        except:
+            decimals = None
         total_supply = self._get_first_result(contract.functions.totalSupply())
 
         token = EthToken()
@@ -82,7 +86,7 @@ class EthTokenService(object):
         # OverflowError exception happens if the return type of the function doesn't match the expected type
         result = call_contract_function(
             func=func,
-            ignore_errors=(BadFunctionCallOutput, ContractLogicError, OverflowError, ValueError),
+            ignore_errors=(BadFunctionCallOutput, OverflowError, ValueError),
             default_value=None)
 
         if self._function_call_result_transformer is not None:
@@ -118,4 +122,6 @@ def call_contract_function(func, ignore_errors, default_value=None):
                              + 'This exception can be safely ignored.', exc_info=True)
             return default_value
         else:
-            raise ex
+            # DEV
+            return default_value
+            #raise ex
