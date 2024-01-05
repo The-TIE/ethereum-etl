@@ -23,6 +23,7 @@
 import json
 import logging
 from collections import defaultdict
+from datetime import datetime
 
 from google.cloud import storage
 
@@ -51,7 +52,8 @@ def build_block_bundles(items):
     block_bundles = []
     for block_number in sorted(blocks.keys()):
         if len(blocks[block_number]) != 1:
-            raise ValueError(f'There must be a single block for a given block number, was {len(blocks[block_number])} for block number {block_number}')
+            raise ValueError(
+                f'There must be a single block for a given block number, was {len(blocks[block_number])} for block number {block_number}')
         block_bundles.append({
             'block': blocks[block_number][0],
             'transactions': transactions[block_number],
@@ -86,15 +88,23 @@ class GcsItemExporter:
             if block is None:
                 raise ValueError('block_bundle must include the block field')
             block_number = block.get('number')
+            timestamp = block.get('timestamp')
+            date = datetime.utcfromtimestamp(timestamp)
+            print(date)
             if block_number is None:
-                raise ValueError('block_bundle must include the block.number field')
-
-            destination_blob_name = f'{self.path}/{block_number}.json'
-
+                raise ValueError(
+                    'block_bundle must include the block.number field')
+            data_to_upload = []
+            destination_blob_name = f'{self.path}{date.year}/{date.month}/{date.day}/{block_number}.json'
+            data_to_upload = []
+            block_bundle['block'] = [block_bundle['block']]
+            for values in block_bundle.values():
+                data_to_upload += [json.dumps(v) for v in values]
             bucket = self.storage_client.bucket(self.bucket)
             blob = bucket.blob(destination_blob_name)
-            blob.upload_from_string(json.dumps(block_bundle))
-            logging.info(f'Uploaded file gs://{self.bucket}/{destination_blob_name}')
+            blob.upload_from_string('\n'.join(data_to_upload))
+            logging.info(
+                f'Uploaded {len(data_to_upload)} items to file gs://{self.bucket}{destination_blob_name}')
 
     def close(self):
         pass
