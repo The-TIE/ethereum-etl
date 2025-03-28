@@ -132,8 +132,6 @@ class EthTraceMapper(object):
 
         trace.from_address = to_normalized_address(tx_trace.get('from'))
         trace.to_address = to_normalized_address(tx_trace.get('to'))
-        print(trace.to_address)
-        quit()
         
         trace.input = tx_trace.get('input')
         trace.output = tx_trace.get('output')
