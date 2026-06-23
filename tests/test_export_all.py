@@ -6,12 +6,14 @@ No skipping, no shortcuts. Tests all export types.
 import os
 import subprocess
 import tempfile
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Get repo root (parent of tests directory)
+REPO_ROOT = Path(__file__).parent.parent.resolve()
 
-API_KEY = os.getenv('ETHERLINK_API_KEY')
-PROVIDER_URI = f"https://the-tie-mainnet-evm.octez.io?apikey={API_KEY}"
+load_dotenv(REPO_ROOT / '.env')
+PROVIDER_URI = os.getenv('PROVIDER')
 
 # Test with 3 blocks
 START_BLOCK = 24900000
@@ -22,12 +24,12 @@ def run_cmd(cmd, description):
     print(f"### {description}")
     print(f"{'='*60}")
     print(f"Command: {' '.join(cmd)}\n")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO_ROOT)
     if result.returncode != 0:
-        print(f"❌ FAILED")
+        print(f"FAILED")
         print(f"STDERR: {result.stderr[:2000]}")
         return False
-    print(f"✅ SUCCESS")
+    print(f"SUCCESS")
     if result.stdout:
         print(result.stdout[:1500] if len(result.stdout) > 1500 else result.stdout)
     return True
@@ -43,6 +45,7 @@ def show_file(filepath, label, max_lines=4):
         print(f"\n--- {label}: (empty or missing) ---")
 
 def main():
+    print(f"Repo root: {REPO_ROOT}")
     print(f"Testing Etherlink RPC: {PROVIDER_URI[:60]}...")
     print(f"Block range: {START_BLOCK} - {END_BLOCK}")
     print(f"\nRunning EXACT same commands as export_all.sh\n")
@@ -134,12 +137,12 @@ def main():
         print(f"{'='*60}")
         cmd = f"python3 ethereumetl extract_csv_column -i {token_transfers_file} -c token_address -o - | sort | uniq > {token_addresses_file}"
         print(f"Command: {cmd}\n")
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=REPO_ROOT)
         if result.returncode != 0:
-            print(f"❌ FAILED: {result.stderr}")
+            print(f"FAILED: {result.stderr}")
             results['extract_token_addresses'] = False
         else:
-            print("✅ SUCCESS")
+            print("SUCCESS")
             results['extract_token_addresses'] = True
         
         show_file(token_addresses_file, "Token Addresses")
@@ -159,7 +162,7 @@ def main():
     print("SUMMARY")
     print(f"{'='*60}")
     for step, success in results.items():
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = "PASS" if success else "FAIL"
         print(f"{status} - {step}")
     
     passed = sum(1 for s in results.values() if s)
