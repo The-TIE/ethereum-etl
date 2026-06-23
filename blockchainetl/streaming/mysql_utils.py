@@ -2,6 +2,5 @@ from sqlalchemy.dialects.mysql import insert
 
 
 def create_insert_statement_for_table(table):
-    insert_stmt = insert(table)
-
+    insert_stmt = insert(table).prefix_with('IGNORE')
     return insert_stmt
