@@ -64,7 +64,8 @@ class ExportTokenTransfersJob(BaseJob):
 
     def _export_batch(self, block_number_batch):
         assert len(block_number_batch) > 0
-        # https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterlogs
+        # previously https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterlogs
+        # now using https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getlogs
         filter_params = {
             'fromBlock': block_number_batch[0],
             'toBlock': block_number_batch[-1],
@@ -74,15 +75,16 @@ class ExportTokenTransfersJob(BaseJob):
         if self.tokens is not None and len(self.tokens) > 0:
             filter_params['address'] = self.tokens
 
-        event_filter = self.web3.eth.filter(filter_params)
-        events = event_filter.get_all_entries()
+        # event_filter = self.web3.eth.filter(filter_params)
+        # events = event_filter.get_all_entries()
+        events = self.web3.eth.get_logs(filter_params)
         for event in events:
             log = self.receipt_log_mapper.web3_dict_to_receipt_log(event)
             token_transfer = self.token_transfer_extractor.extract_transfer_from_log(log)
             if token_transfer is not None:
                 self.item_exporter.export_item(self.token_transfer_mapper.token_transfer_to_dict(token_transfer))
 
-        self.web3.eth.uninstallFilter(event_filter.filter_id)
+        # self.web3.eth.uninstallFilter(event_filter.filter_id)
 
     def _end(self):
         self.batch_work_executor.shutdown()
