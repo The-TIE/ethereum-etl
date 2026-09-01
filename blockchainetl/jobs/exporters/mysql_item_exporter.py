@@ -1,6 +1,10 @@
 import collections
 
-from sqlalchemy import create_engine
+from sqlalchemy import (
+    create_engine,
+    exc,
+    text,
+)
 
 from blockchainetl.jobs.exporters.converters.composite_item_converter import CompositeItemConverter
 
@@ -26,7 +30,20 @@ class MySQLItemExporter:
             if item_group:
                 connection = self.engine.connect()
                 converted_items = list(self.convert_items(item_group))
-                connection.execute(insert_stmt, converted_items)
+
+                # DEV: on conflict do nothing.
+                #print(insert_stmt)
+                #print(converted_items)
+                #connection.execute(insert_stmt.on_conflict_do_nothing(), tuple(converted_items))
+                try:
+                    connection.execute(insert_stmt, converted_items)
+                except exc.IntegrityError as e:
+                    continue
+                #connection.execute(str(insert_stmt), [v for k, v in converted_items[0].items()])
+                #try:
+                #    connection.execute(insert_stmt, converted_items)
+                #except:
+                #    return
 
     def convert_items(self, items):
         for item in items:

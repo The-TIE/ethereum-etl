@@ -169,11 +169,11 @@ class EthStreamerAdapter:
             start_block=start_block,
             end_block=end_block,
             batch_size=self.batch_size,
-<<<<<<< HEAD
-            batch_web3_provider=self.batch_web3_provider, #ThreadLocalProxy(lambda: Web3(self.batch_web3_provider)),
-=======
+#<<<<<<< HEAD
+#            batch_web3_provider=self.batch_web3_provider, #ThreadLocalProxy(lambda: Web3(self.batch_web3_provider)),
+#=======
             web3=ThreadLocalProxy(lambda: build_web3(self.batch_web3_provider)),
->>>>>>> 8a49edcae38ecfb9657d355a7463fe1c0eff4734
+#>>>>>>> 8a49edcae38ecfb9657d355a7463fe1c0eff4734
             max_workers=self.max_workers,
             item_exporter=exporter
         )

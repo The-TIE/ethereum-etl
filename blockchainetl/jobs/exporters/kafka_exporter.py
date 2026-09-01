@@ -14,7 +14,12 @@ class KafkaItemExporter:
         self.converter = CompositeItemConverter(converters)
         self.connection_url = self.get_connection_url(output)
         print(self.connection_url)
-        self.producer = KafkaProducer(bootstrap_servers=self.connection_url)
+        #self.producer = KafkaProducer(bootstrap_servers=self.connection_url)
+        # DEV:
+        self.producer = KafkaProducer(
+            bootstrap_servers=self.connection_url,
+            api_version=(2,6,2),
+        )
 
     def get_connection_url(self, output):
         try:

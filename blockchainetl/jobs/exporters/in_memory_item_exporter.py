@@ -34,11 +34,21 @@ class InMemoryItemExporter:
         item_type = item.get('type', None)
         if item_type is None:
             raise ValueError('type key is not found in item {}'.format(repr(item)))
-
+        ###
+        #if item_type=='geth_trace':
+        #    item_type = 'trace'
+        ###  
+        print('-------------------------------------------')
+        print(item)
+        print('-------------------------------------------')
         self.items[item_type].append(item)
 
     def close(self):
         pass
 
     def get_items(self, item_type):
+        ###
+        #if item_type=='geth_trace':
+        #    item_type = 'trace'
+        ###
         return self.items[item_type]
